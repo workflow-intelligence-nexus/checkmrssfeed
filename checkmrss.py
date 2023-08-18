@@ -4,12 +4,17 @@ import sys
 
 def check_url(url):
     try:
-        response = requests.get(url)
-        if "<Code>AccessDenied</Code>" in response.text:
-            return False
+        response = requests.head(url, allow_redirects=True)
+        # Check if the content type is XML, indicating an error page
+        if response.headers.get('Content-Type') == 'application/xml':
+            # Optionally, you can make a GET request to check for the specific "Access Denied" message
+            response = requests.get(url)
+            if "<Code>AccessDenied</Code>" in response.text:
+                return False
     except Exception as e:
         print(f"Error checking URL {url}: {e}")
     return True
+
 
 def main(feed_url):
     response = requests.get(feed_url)
